@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Learning — Finance, Accounting & Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e28;
+    --border: #252936;
+    --accent: #c8a96e;
+    --accent2: #7eb8c9;
+    --accent3: #9b7ed4;
+    --text: #e8e6e0;
+    --text-muted: #7a7d8a;
+    --text-dim: #4a4d5a;
+    --success: #6dbf8f;
+    --danger: #d96b6b;
+    --tag-fp: #c8a96e22;
+    --tag-fp-border: #c8a96e55;
+    --tag-ac: #7eb8c922;
+    --tag-ac-border: #7eb8c955;
+    --tag-ad: #9b7ed422;
+    --tag-ad-border: #9b7ed455;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* Layout */
+  .shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .sidebar-head {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .streak-bar {
+    margin: 16px 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .streak-icon { font-size: 18px; }
+
+  .streak-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .streak-num {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent);
+    font-family: 'Playfair Display', serif;
+    line-height: 1;
+  }
+
+  .nav-section {
+    padding: 8px 24px 4px;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 8px;
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 24px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-btn:hover { color: var(--text); background: var(--surface2); }
+  .nav-btn.active { color: var(--accent); border-left-color: var(--accent); background: var(--surface2); }
+  .nav-btn .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+  .history-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0 24px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .history-item {
+    padding: 8px 24px;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .history-item:hover { background: var(--surface2); border-left-color: var(--border); }
+  .history-item.active { background: var(--surface2); border-left-color: var(--accent2); }
+
+  .history-date {
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-dim);
+    margin-bottom: 2px;
+  }
+
+  .history-title {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .history-item.active .history-title { color: var(--text); }
+
+  .cat-pill {
+    display: inline-block;
+    font-size: 9px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-top: 3px;
+  }
+
+  .cat-fp { background: var(--tag-fp); border: 1px solid var(--tag-fp-border); color: var(--accent); }
+  .cat-ac { background: var(--tag-ac); border: 1px solid var(--tag-ac-border); color: var(--accent2); }
+  .cat-ad { background: var(--tag-ad); border: 1px solid var(--tag-ad-border); color: var(--accent3); }
+
+  /* Main */
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .date-display {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+
+  .api-key-area {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .api-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 12px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    width: 220px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .api-input:focus { border-color: var(--accent); }
+  .api-input::placeholder { color: var(--text-dim); }
+
+  .btn {
+    background: var(--accent);
+    color: #0d0f14;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-ghost {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .btn-ghost:hover { border-color: var(--text-muted); color: var(--text); opacity: 1; }
+  .btn-sm { padding: 5px 12px; font-size: 11px; }
+
+  /* Content */
+  .content {
+    padding: 40px;
+    flex: 1;
+    max-width: 860px;
+  }
+
+  /* Welcome screen */
+  .welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 60px 40px;
+    max-width: 680px;
+  }
+
+  .welcome-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .welcome h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  .welcome p {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  .track-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 32px;
+  }
+
+  .track-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .track-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .track-card.selected { border-color: var(--accent); background: var(--surface2); }
+
+  .track-icon { font-size: 22px; margin-bottom: 8px; }
+
+  .track-name {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .track-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* Lesson view */
+  .lesson-header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .lesson-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .lesson-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .lesson-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .lesson-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .lesson-meta span { display: flex; align-items: center; gap: 4px; }
+
+  /* Lesson body */
+  .lesson-body {
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--text);
+  }
+
+  .lesson-body h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 32px 0 12px;
+    color: var(--text);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .lesson-body h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 22px 0 8px;
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .lesson-body p { margin-bottom: 14px; color: var(--text-muted); }
+  .lesson-body strong { color: var(--text); font-weight: 600; }
+
+  .lesson-body ul, .lesson-body ol {
+    padding-left: 20px;
+    margin-bottom: 14px;
+    color: var(--text-muted);
+  }
+
+  .lesson-body li { margin-bottom: 6px; }
+
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .callout.info { border-left-color: var(--accent2); }
+  .callout.tip { border-left-color: var(--success); }
+
+  .example-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin: 20px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+
+  .example-box .ex-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  /* Quiz */
+  .quiz-section {
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .quiz-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .quiz-badge {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-muted);
+  }
+
+  .quiz-q {
+    margin-bottom: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    transition: border-color 0.2s;
+  }
+
+  .quiz-q.answered { border-color: var(--border); }
+
+  .q-text {
+    font-size: 14.5px;
+    font-weight: 500;
+    margin-bottom: 14px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .q-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .option {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    transition: all 0.15s;
+    text-align: left;
+    width: 100%;
+    font-family: 'IBM Plex Sans', sans-serif;
+    line-height: 1.4;
+  }
+
+  .option:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+  .option.correct { border-color: var(--success); background: #6dbf8f15; color: var(--success); }
+  .option.wrong { border-color: var(--danger); background: #d96b6b15; color: var(--danger); }
+  .option.reveal { border-color: var(--success); background: #6dbf8f08; color: var(--success); }
+  .option:disabled { cursor: default; }
+
+  .q-feedback {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border-radius: 6px;
+    display: none;
+  }
+
+  .q-feedback.show { display: block; }
+
+  .quiz-score {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-top: 20px;
+    display: none;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .quiz-score.show { display: flex; }
+
+  .score-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .score-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* Resources */
+  .resources-section {
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  .resources-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .resource-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .resource-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-decoration: none;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .resource-link:hover { border-color: var(--accent2); transform: translateX(2px); }
+
+  .rl-icon {
+    font-size: 18px;
+    width: 28px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .rl-body { flex: 1; min-width: 0; }
+
+  .rl-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .rl-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .rl-url {
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent2);
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Loading */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 60px 40px;
+    gap: 20px;
+  }
+
+  .loading-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .loading-bar {
+    width: 240px;
+    height: 2px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .loading-bar::after {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 40%;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: slide 1.4s ease-in-out infinite;
+  }
+
+  @keyframes slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  .loading-topic {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--text-dim);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.9; }
+  }
+
+  /* Error */
+  .error-box {
+    background: #d96b6b10;
+    border: 1px solid #d96b6b40;
+    border-radius: 8px;
+    padding: 16px 20px;
+    color: var(--danger);
+    font-size: 13px;
+    margin: 20px 40px;
+  }
+
+  /* Settings panel */
+  .settings-panel {
+    padding: 40px;
+    max-width: 600px;
+  }
+
+  .settings-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .settings-sub {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+
+  .setting-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+  }
+
+  .setting-label {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .setting-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .full-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .full-input:focus { border-color: var(--accent); }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 15px;
+    height: 15px;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  .danger-zone {
+    background: #d96b6b08;
+    border: 1px solid #d96b6b30;
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  .danger-zone .setting-label { color: var(--danger); }
+
+  /* Progress indicators */
+  .progress-dots {
+    display: flex;
+    gap: 5px;
+    margin-top: 8px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .dot.done { background: var(--accent); }
+  .dot.today { background: var(--accent2); }
+
+  /* Empty history */
+  .empty-history {
+    padding: 20px 24px;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar { position: relative; height: auto; }
+    .content, .settings-panel, .loading-state { padding: 24px; }
+    .welcome { padding: 32px 24px; }
+    .topbar { padding: 16px 24px; }
+    .welcome h1 { font-size: 32px; }
+    .track-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <div class="logo">The Morning Brief</div>
+      <div class="logo-sub">Daily Finance Learning</div>
+    </div>
+
+    <div class="streak-bar">
+      <span class="streak-icon">🔥</span>
+      <div>
+        <div class="streak-num" id="streakNum">0</div>
+        <div class="streak-text">day streak</div>
+      </div>
+      <div style="margin-left:auto; text-align:right;">
+        <div style="font-size:11px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace;" id="totalLessons">0 lessons</div>
+      </div>
+    </div>
+
+    <div class="nav-section">Navigation</div>
+    <button class="nav-btn active" id="navToday" onclick="showView('today')">
+      <span class="nav-icon">📖</span> Today's Lesson
+    </button>
+    <button class="nav-btn" id="navSettings" onclick="showView('settings')">
+      <span class="nav-icon">⚙️</span> Settings
+    </button>
+
+    <div class="nav-section" style="margin-top:16px;">Past Lessons</div>
+    <div class="history-list" id="historyList">
+      <div class="empty-history">No lessons yet — generate your first one!</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div class="date-display" id="todayDate">—</div>
+      <div class="api-key-area" id="apiKeyBar">
+        <input type="password" class="api-input" id="apiKeyInput" placeholder="sk-ant-... (API key)">
+        <button class="btn btn-sm" onclick="saveApiKey()">Save Key</button>
+      </div>
+    </div>
+
+    <!-- Views -->
+    <div id="viewToday"></div>
+    <div id="viewSettings" style="display:none;"></div>
+  </main>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+
+const STATE = {
+  apiKey: '',
+  lessons: {},       // keyed by YYYY-MM-DD
+  preferences: {
+    focus: ['accounting', 'finance', 'admin'],
+    level: 'intermediate',
+    name: 'Danielle',
+  },
+  streak: 0,
+};
+
+const TOPICS = {
+  accounting: {
+    label: 'Accounting',
+    color: 'ac',
+    icon: '📊',
+    topics: [
+      'Double-entry bookkeeping fundamentals',
+      'The accounting equation and balance sheets',
+      'Debits and credits — how they really work',
+      'Chart of accounts structure',
+      'The income statement (P&L)',
+      'Cash vs accrual accounting',
+      'Revenue recognition principles',
+      'Accounts payable and receivable cycles',
+      'Bank reconciliation process',
+      'Journal entries and the general ledger',
+      'Trial balance and closing entries',
+      'GST in Australia — how it works',
+      'BAS preparation and lodgement',
+      'Payroll accounting basics',
+      'Fixed assets and depreciation methods',
+      'Inventory accounting methods (FIFO, LIFO, weighted average)',
+      'Provisions and accruals',
+      'Prepayments and deferred revenue',
+      'Intercompany transactions',
+      'Consolidation basics',
+      'Working capital management',
+      'Cash flow statement analysis',
+      'Ratio analysis — liquidity ratios',
+      'Ratio analysis — profitability ratios',
+      'Audit trails and internal controls',
+      'Chart of accounts for property management',
+      'Job costing fundamentals',
+      'Cost centres and profit centres',
+      'Management accounts vs statutory accounts',
+      'AASB standards overview',
+    ]
+  },
+  finance: {
+    label: 'Finance & FP&A',
+    color: 'fp',
+    icon: '📈',
+    topics: [
+      'FP&A fundamentals — what financial planning & analysis actually does',
+      'Budgeting — zero-based vs incremental approaches',
+      'Variance analysis — budget vs actuals',
+      'Rolling forecasts and why they beat static budgets',
+      'Time value of money',
+      'Net Present Value (NPV) and Internal Rate of Return (IRR)',
+      'Discounted cash flow (DCF) modelling',
+      'Working capital and the cash conversion cycle',
+      'Capital allocation decisions',
+      'Financial modelling best practices in Excel',
+      'Scenario and sensitivity analysis',
+      'KPIs and operational metrics design',
+      'Grant funding — reporting and compliance financials',
+      'Government contract financials',
+      'Revenue forecasting methods',
+      'Cost drivers and cost modelling',
+      'EBITDA — what it is and its limitations',
+      'Break-even analysis',
+      'Margin analysis — gross, operating, net',
+      'Reading and interpreting annual reports',
+      'Renewable energy finance basics (for your Brookfield background)',
+      'Infrastructure asset valuation concepts',
+      'Return on investment (ROI) frameworks',
+      'Treasury and cash management basics',
+      'Financial risk management fundamentals',
+    ]
+  },
+  admin: {
+    label: 'Admin & Operations',
+    color: 'ad',
+    icon: '🗂️',
+    topics: [
+      'Contract management fundamentals',
+      'Invoice verification and processing best practices',
+      'Procurement processes and supplier management',
+      'Compliance reporting for government contracts',
+      'Document control systems',
+      'Xero fundamentals — chart of accounts setup',
+      'Xero — reconciliation workflow',
+      'Xero — bills and purchase orders',
+      'AroFlo job management system concepts',
+      'ApprovalMax — approval workflow automation',
+      'NDIS and government funding compliance basics',
+      'Property management operations and maintenance accounting',
+      'Employment compliance in the NT — Fair Work basics',
+      'Work health and safety documentation',
+      'Reporting to boards and executives',
+      'Project management fundamentals for admin roles',
+      'Data management and record keeping',
+      'Stakeholder communication in complex organisations',
+      'Indigenous procurement policy and its implications',
+      'Subcontractor management and compliance',
+    ]
+  }
+};
+
+// ─── Persistence ──────────────────────────────────────────────────────────────
+
+function save() {
+  localStorage.setItem('tmb_state', JSON.stringify({
+    apiKey: STATE.apiKey,
+    lessons: STATE.lessons,
+    preferences: STATE.preferences,
+  }));
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem('tmb_state');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    STATE.apiKey = d.apiKey || '';
+    STATE.lessons = d.lessons || {};
+    STATE.preferences = { ...STATE.preferences, ...(d.preferences || {}) };
+  } catch(e) {}
+}
+
+function todayKey() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function formatDate(key) {
+  const d = new Date(key + 'T00:00:00');
+  return d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function computeStreak() {
+  const keys = Object.keys(STATE.lessons).sort().reverse();
+  if (!keys.length) return 0;
+  let streak = 0;
+  let expected = new Date();
+  expected.setHours(0,0,0,0);
+  for (const k of keys) {
+    const d = new Date(k + 'T00:00:00');
+    const diff = Math.round((expected - d) / 86400000);
+    if (diff > 1) break;
+    streak++;
+    expected = d;
+    expected.setDate(expected.getDate() - 1);
+  }
+  return streak;
+}
+
+// ─── Topic Selection ──────────────────────────────────────────────────────────
+
+function pickTopic() {
+  const covered = Object.values(STATE.lessons).map(l => l.topic);
+  const focus = STATE.preferences.focus;
+  const pool = [];
+  for (const cat of focus) {
+    for (const t of TOPICS[cat].topics) {
+      if (!covered.includes(t)) pool.push({ topic: t, cat });
+    }
+  }
+  if (!pool.length) {
+    // All covered — restart cycle
+    const all = [];
+    for (const cat of focus) for (const t of TOPICS[cat].topics) all.push({ topic: t, cat });
+    return all[Math.floor(Math.random() * all.length)];
+  }
+  // Weighted random — prefer accounting if it's in focus
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// ─── API Call ─────────────────────────────────────────────────────────────────
+
+async function generateLesson(topicObj) {
+  const { topic, cat } = topicObj;
+  const catLabel = TOPICS[cat].label;
+  const levelMap = {
+    beginner: 'Keep explanations simple with analogies. No jargon without explanation.',
+    intermediate: 'Assume familiarity with basic business concepts. Use real examples.',
+    advanced: 'Go deep. Include technical nuance and edge cases.',
+  };
+  const lvl = levelMap[STATE.preferences.level] || levelMap.intermediate;
+
+  const prompt = `You are a world-class finance and accounting educator creating a daily lesson for ${STATE.preferences.name || 'a learner'}, who is currently an admin/finance officer at an Indigenous property management company in remote Northern Territory, Australia. She previously worked as an FP&A analyst at Brookfield Renewable and wants to rebuild and deepen her knowledge.
+
+Today's lesson topic: "${topic}" (Category: ${catLabel})
+
+Learning level: ${lvl}
+
+Create a lesson that takes 30-60 minutes to read and study. Structure it as follows (respond ONLY in valid JSON — no markdown, no code fences):
+
+{
+  "title": "Engaging lesson title",
+  "subtitle": "One sentence hook/description",
+  "estimatedMins": 40,
+  "keyTakeaways": ["takeaway 1", "takeaway 2", "takeaway 3"],
+  "sections": [
+    {
+      "heading": "Section heading",
+      "type": "text|example|callout|tip",
+      "content": "Rich educational content here. Use plain text with **bold** for emphasis. Write in paragraphs. Be specific and use real numbers/examples. For examples, use Australian context where possible — GST at 10%, AUD amounts, NT-specific context where relevant."
+    }
+  ],
+  "realWorldApplication": "A specific paragraph about how this applies to property management, government contract administration, or the NT context.",
+  "quiz": [
+    {
+      "question": "Clear question text?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correct": 0,
+      "explanation": "Explanation of why this is correct and why others are wrong."
+    }
+  ],
+  "resources": [
+    {
+      "title": "Resource title",
+      "description": "Why this is useful",
+      "url": "https://actual-real-url.com",
+      "type": "article|video|tool|course|documentation"
+    }
+  ]
+}
+
+Requirements:
+- Write 4-6 rich content sections (each 150-300 words)
+- Include at least one worked numerical example with real numbers
+- Write 5 quiz questions with 4 options each (mix of easy, medium, hard)
+- Include 4-6 real, working external resource URLs (prefer: ATO, AASB, Xero blog, AccountingCoach, Khan Academy, CPA Australia, ICAA, Investopedia, CFI, Australian Government sites)
+- Make it genuinely educational, not surface-level
+- Connect to practical job relevance wherever possible`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': STATE.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-5',
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API error ${res.status}`);
+  }
+
+  const data = await res.json();
+  const raw = data.content?.[0]?.text || '';
+  // Strip any accidental markdown fences
+  const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  return JSON.parse(clean);
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+
+function renderSidebar() {
+  STATE.streak = computeStreak();
+  document.getElementById('streakNum').textContent = STATE.streak;
+  document.getElementById('totalLessons').textContent = Object.keys(STATE.lessons).length + ' lessons';
+
+  const list = document.getElementById('historyList');
+  const keys = Object.keys(STATE.lessons).sort().reverse();
+  if (!keys.length) {
+    list.innerHTML = '<div class="empty-history">No lessons yet — generate your first one!</div>';
+    return;
+  }
+
+  list.innerHTML = keys.map(k => {
+    const l = STATE.lessons[k];
+    const isToday = k === todayKey();
+    return `<div class="history-item ${isToday ? 'active' : ''}" onclick="loadLesson('${k}')">
+      <div class="history-date">${isToday ? '→ Today' : formatDate(k)}</div>
+      <div class="history-title">${l.title || l.topic}</div>
+      <span class="cat-pill cat-${l.cat}">${TOPICS[l.cat]?.label || l.cat}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderTodayView() {
+  const key = todayKey();
+  const lesson = STATE.lessons[key];
+  const container = document.getElementById('viewToday');
+
+  if (!STATE.apiKey) {
+    container.innerHTML = renderWelcome(true);
+    return;
+  }
+
+  if (!lesson) {
+    container.innerHTML = renderWelcome(false);
+    return;
+  }
+
+  container.innerHTML = renderLesson(lesson, key);
+  attachQuizHandlers(key);
+}
+
+function renderWelcome(needsKey) {
+  const tracks = Object.entries(TOPICS).map(([k,v]) => {
+    const sel = STATE.preferences.focus.includes(k) ? 'selected' : '';
+    return `<div class="track-card ${sel}" onclick="toggleFocus('${k}', this)">
+      <div class="track-icon">${v.icon}</div>
+      <div class="track-name">${v.label}</div>
+      <div class="track-desc">${v.topics.length} lessons in this track</div>
+    </div>`;
+  }).join('');
+
+  const keyWarning = needsKey ? `<div class="callout" style="margin-bottom:20px;">
+    <strong>⚠️ API Key Required</strong><br>
+    Enter your Anthropic API key in the top bar to generate lessons. Your key is stored only in your browser.
+  </div>` : '';
+
+  return `<div class="welcome">
+    <div class="welcome-eyebrow">Good morning, ${STATE.preferences.name || 'there'}</div>
+    <h1>Ready to learn<br>something today?</h1>
+    ${keyWarning}
+    <p>30–60 minutes a day. Finance, accounting, and operations — taught in context, with real examples from property management, government contracts, and the NT.</p>
+    <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px; font-weight:500;">Choose your focus tracks:</div>
+    <div class="track-grid">${tracks}</div>
+    <button class="btn" onclick="startGenerate()" style="font-size:14px; padding:12px 28px;">
+      Generate Today's Lesson →
+    </button>
+  </div>`;
+}
+
+function renderLesson(lesson, key) {
+  const cat = lesson.cat || 'ac';
+  const catLabel = TOPICS[cat]?.label || 'Lesson';
+  const catColor = { fp: 'var(--accent)', ac: 'var(--accent2)', ad: 'var(--accent3)' }[cat] || 'var(--accent)';
+  const isToday = key === todayKey();
+
+  // Sections
+  const sectionsHtml = (lesson.data?.sections || []).map(s => {
+    if (s.type === 'example') {
+      return `<div class="example-box"><div class="ex-label">Worked Example</div>${formatContent(s.content)}</div>`;
+    }
+    if (s.type === 'callout') {
+      return `<h2>${s.heading}</h2><div class="callout">${formatContent(s.content)}</div>`;
+    }
+    if (s.type === 'tip') {
+      return `<h2>${s.heading}</h2><div class="callout tip">${formatContent(s.content)}</div>`;
+    }
+    return `<h2>${s.heading}</h2><p>${formatContent(s.content)}</p>`;
+  }).join('');
+
+  // Key takeaways
+  const takeaways = (lesson.data?.keyTakeaways || []).map(t =>
+    `<li>${t}</li>`
+  ).join('');
+
+  // Real world
+  const rwa = lesson.data?.realWorldApplication
+    ? `<div class="callout info"><strong>🏢 Real-World Application</strong><br><br>${lesson.data.realWorldApplication}</div>`
+    : '';
+
+  // Quiz
+  const quizHtml = renderQuiz(lesson, key);
+
+  // Resources
+  const resources = (lesson.data?.resources || []).map(r => {
+    const icons = { article: '📄', video: '🎬', tool: '🛠️', course: '🎓', documentation: '📚' };
+    return `<a class="resource-link" href="${r.url}" target="_blank" rel="noopener">
+      <div class="rl-icon">${icons[r.type] || '🔗'}</div>
+      <div class="rl-body">
+        <div class="rl-title">${r.title}</div>
+        <div class="rl-desc">${r.description}</div>
+        <div class="rl-url">${r.url}</div>
+      </div>
+    </a>`;
+  }).join('');
+
+  const regenerateBtn = isToday ? `<button class="btn btn-ghost btn-sm" onclick="regenerateToday()" style="margin-left:12px;">↻ Regenerate</button>` : '';
+
+  return `<div class="content">
+    <div class="lesson-header">
+      <div class="lesson-eyebrow">
+        <span class="cat-pill cat-${cat}">${catLabel}</span>
+        <span class="lesson-num">${formatDate(key)}</span>
+        ${regenerateBtn}
+      </div>
+      <div class="lesson-title">${lesson.data?.title || lesson.topic}</div>
+      ${lesson.data?.subtitle ? `<div style="color:var(--text-muted); font-size:15px; margin-bottom:10px;">${lesson.data.subtitle}</div>` : ''}
+      <div class="lesson-meta">
+        <span>⏱ ~${lesson.data?.estimatedMins || 40} mins</span>
+        <span>📚 ${(lesson.data?.sections || []).length} sections</span>
+        <span>❓ ${(lesson.data?.quiz || []).length} quiz questions</span>
+      </div>
+    </div>
+
+    <div class="lesson-body">
+      ${takeaways ? `<div class="callout"><strong>Key Takeaways</strong><ul style="margin-top:8px;padding-left:18px;">${takeaways}</ul></div>` : ''}
+      ${sectionsHtml}
+      ${rwa}
+    </div>
+
+    ${quizHtml}
+
+    ${resources ? `<div class="resources-section">
+      <div class="resources-title">Further Reading & Resources</div>
+      <div class="resource-links">${resources}</div>
+    </div>` : ''}
+
+    <div style="height:60px;"></div>
+  </div>`;
+}
+
+function formatContent(text) {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+}
+
+function renderQuiz(lesson, key) {
+  const quiz = lesson.data?.quiz || [];
+  if (!quiz.length) return '';
+
+  const answers = lesson.quizAnswers || {};
+
+  const questions = quiz.map((q, i) => {
+    const answered = answers[i] !== undefined;
+    const options = q.options.map((opt, j) => {
+      let cls = '';
+      if (answered) {
+        if (j === q.correct) cls = 'correct';
+        else if (j === answers[i] && answers[i] !== q.correct) cls = 'wrong';
+      }
+      return `<button class="option ${cls}" ${answered ? 'disabled' : ''} onclick="answerQ('${key}', ${i}, ${j})">${opt}</button>`;
+    }).join('');
+
+    return `<div class="quiz-q ${answered ? 'answered' : ''}" id="qq-${key}-${i}">
+      <div class="q-num">Question ${i+1} of ${quiz.length}</div>
+      <div class="q-text">${q.question}</div>
+      <div class="options">${options}</div>
+      <div class="q-feedback ${answered ? 'show' : ''}" id="qf-${key}-${i}">${q.explanation || ''}</div>
+    </div>`;
+  }).join('');
+
+  const allAnswered = Object.keys(answers).length === quiz.length;
+  const correct = Object.entries(answers).filter(([i, a]) => a === quiz[i]?.correct).length;
+
+  const score = allAnswered ? `<div class="quiz-score show">
+    <div class="score-num">${correct}/${quiz.length}</div>
+    <div class="score-label">
+      <strong>${correct === quiz.length ? '🎉 Perfect score!' : correct >= quiz.length * 0.8 ? '✅ Great work!' : correct >= quiz.length * 0.6 ? '📈 Getting there!' : '📚 Keep studying!'}</strong><br>
+      You answered ${correct} out of ${quiz.length} correctly.
+    </div>
+  </div>` : '';
+
+  return `<div class="quiz-section">
+    <div class="quiz-header">
+      <div class="quiz-title">Knowledge Check</div>
+      <div class="quiz-badge">${quiz.length} questions</div>
+    </div>
+    ${questions}
+    <div id="quiz-score-${key}">${score}</div>
+  </div>`;
+}
+
+// ─── Interactions ─────────────────────────────────────────────────────────────
+
+function answerQ(key, qIdx, answer) {
+  const lesson = STATE.lessons[key];
+  if (!lesson) return;
+  if (!lesson.quizAnswers) lesson.quizAnswers = {};
+  lesson.quizAnswers[qIdx] = answer;
+  save();
+
+  // Update UI
+  const quiz = lesson.data?.quiz || [];
+  const q = quiz[qIdx];
+  const container = document.getElementById(`qq-${key}-${qIdx}`);
+  const feedback = document.getElementById(`qf-${key}-${qIdx}`);
+  if (!container || !q) return;
+
+  container.classList.add('answered');
+  container.querySelectorAll('.option').forEach((btn, j) => {
+    btn.disabled = true;
+    if (j === q.correct) btn.classList.add('correct');
+    else if (j === answer && answer !== q.correct) btn.classList.add('wrong');
+  });
+  if (feedback) feedback.classList.add('show');
+
+  // Check if all done
+  const allDone = Object.keys(lesson.quizAnswers).length === quiz.length;
+  if (allDone) {
+    const correct = Object.entries(lesson.quizAnswers).filter(([i, a]) => a === quiz[i]?.correct).length;
+    const scoreEl = document.getElementById(`quiz-score-${key}`);
+    if (scoreEl) {
+      scoreEl.innerHTML = `<div class="quiz-score show">
+        <div class="score-num">${correct}/${quiz.length}</div>
+        <div class="score-label">
+          <strong>${correct === quiz.length ? '🎉 Perfect score!' : correct >= quiz.length * 0.8 ? '✅ Great work!' : correct >= quiz.length * 0.6 ? '📈 Getting there!' : '📚 Keep studying!'}</strong><br>
+          You answered ${correct} out of ${quiz.length} correctly.
+        </div>
+      </div>`;
+    }
+  }
+}
+
+function attachQuizHandlers(key) {
+  // Handlers are inline onclick — nothing extra needed
+}
+
+function toggleFocus(cat, el) {
+  const idx = STATE.preferences.focus.indexOf(cat);
+  if (idx >= 0) {
+    if (STATE.preferences.focus.length === 1) return; // keep at least 1
+    STATE.preferences.focus.splice(idx, 1);
+    el.classList.remove('selected');
+  } else {
+    STATE.preferences.focus.push(cat);
+    el.classList.add('selected');
+  }
+  save();
+}
+
+async function startGenerate() {
+  if (!STATE.apiKey) {
+    alert('Please enter your Anthropic API key first (top bar).');
+    return;
+  }
+  const key = todayKey();
+  const topicObj = pickTopic();
+  showLoading(topicObj.topic);
+
+  try {
+    const data = await generateLesson(topicObj);
+    STATE.lessons[key] = {
+      topic: topicObj.topic,
+      cat: topicObj.cat,
+      generatedAt: new Date().toISOString(),
+      data,
+      quizAnswers: {},
+    };
+    save();
+    renderSidebar();
+    renderTodayView();
+  } catch(e) {
+    document.getElementById('viewToday').innerHTML =
+      `<div class="error-box">⚠️ Error generating lesson: ${e.message}<br><br>
+      <button class="btn btn-ghost btn-sm" onclick="startGenerate()">Try again</button></div>
+      ${renderWelcome(false)}`;
+  }
+}
+
+function showLoading(topic) {
+  document.getElementById('viewToday').innerHTML = `
+    <div class="loading-state">
+      <div class="loading-label">Generating your lesson</div>
+      <div class="loading-topic">${topic}</div>
+      <div class="loading-bar"></div>
+      <div style="font-size:12px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; margin-top:8px;">This takes ~20 seconds…</div>
+    </div>`;
+}
+
+async function regenerateToday() {
+  if (!confirm('Generate a new lesson for today? This will replace the current one.')) return;
+  const key = todayKey();
+  delete STATE.lessons[key];
+  save();
+  await startGenerate();
+}
+
+function loadLesson(key) {
+  const lesson = STATE.lessons[key];
+  if (!lesson) return;
+  document.getElementById('viewToday').innerHTML = renderLesson(lesson, key);
+  attachQuizHandlers(key);
+  showView('today');
+  // Highlight in sidebar
+  document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+  event?.currentTarget?.classList.add('active');
+}
+
+function saveApiKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (!val) return;
+  STATE.apiKey = val;
+  save();
+  document.getElementById('apiKeyInput').value = '';
+  document.getElementById('apiKeyInput').placeholder = '✓ Key saved';
+  renderTodayView();
+}
+
+function showView(view) {
+  document.getElementById('viewToday').style.display = view === 'today' ? '' : 'none';
+  document.getElementById('viewSettings').style.display = view === 'settings' ? '' : 'none';
+  document.getElementById('navToday').classList.toggle('active', view === 'today');
+  document.getElementById('navSettings').classList.toggle('active', view === 'settings');
+
+  if (view === 'settings') renderSettingsView();
+}
+
+function renderSettingsView() {
+  const prefs = STATE.preferences;
+  const levelOptions = ['beginner', 'intermediate', 'advanced'].map(l =>
+    `<option value="${l}" ${prefs.level === l ? 'selected' : ''}>${l.charAt(0).toUpperCase() + l.slice(1)}</option>`
+  ).join('');
+
+  document.getElementById('viewSettings').innerHTML = `
+    <div class="settings-panel">
+      <div class="settings-title">Settings</div>
+      <div class="settings-sub">Customise your learning experience.</div>
+
+      <div class="setting-row">
+        <div class="setting-label">Your Name</div>
+        <div class="setting-desc">Used to personalise lessons.</div>
+        <input class="full-input" id="sName" value="${prefs.name || ''}" placeholder="Your name">
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">Knowledge Level</div>
+        <div class="setting-desc">Controls lesson depth and complexity.</div>
+        <select class="full-input" id="sLevel">${levelOptions}</select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">API Key</div>
+        <div class="setting-desc">Your Anthropic API key (stored locally in your browser only).</div>
+        <input type="password" class="full-input" id="sApiKey" placeholder="${STATE.apiKey ? '••••••••••• (saved)' : 'sk-ant-...'}">
+      </div>
+
+      <button class="btn" onclick="saveSettings()" style="margin-top:4px;">Save Settings</button>
+
+      <div class="divider"></div>
+
+      <div class="setting-row">
+        <div class="setting-label">Stats</div>
+        <div style="display:flex; gap:24px; margin-top:8px;">
+          <div>
+            <div style="font-family:'Playfair Display',serif; font-size:28px; color:var(--accent);">${Object.keys(STATE.lessons).length}</div>
+            <div style="font-size:11px; color:var(--text-muted);">Lessons completed</div>
+          </div>
+          <div>
+            <div style="font-family:'Playfair Display',serif; font-size:28px; color:var(--accent2);">${STATE.streak}</div>
+            <div style="font-size:11px; color:var(--text-muted);">Day streak</div>
+          </div>
+          <div>
+            <div style="font-family:'Playfair Display',serif; font-size:28px; color:var(--accent3);">${computeQuizScore()}%</div>
+            <div style="font-size:11px; color:var(--text-muted);">Quiz avg</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="danger-zone">
+        <div class="setting-label">Clear All Data</div>
+        <div class="setting-desc" style="color:var(--text-muted); margin:6px 0 12px;">Delete all lessons and settings. This cannot be undone.</div>
+        <button class="btn btn-ghost btn-sm" onclick="clearAll()" style="border-color:#d96b6b55; color:var(--danger);">Clear Everything</button>
+      </div>
+    </div>`;
+}
+
+function saveSettings() {
+  STATE.preferences.name = document.getElementById('sName').value.trim() || 'Danielle';
+  STATE.preferences.level = document.getElementById('sLevel').value;
+  const newKey = document.getElementById('sApiKey').value.trim();
+  if (newKey) STATE.apiKey = newKey;
+  save();
+  alert('Settings saved!');
+}
+
+function clearAll() {
+  if (!confirm('Delete ALL lessons and settings? This cannot be undone.')) return;
+  localStorage.removeItem('tmb_state');
+  location.reload();
+}
+
+function computeQuizScore() {
+  let total = 0, correct = 0;
+  for (const lesson of Object.values(STATE.lessons)) {
+    const quiz = lesson.data?.quiz || [];
+    const answers = lesson.quizAnswers || {};
+    for (const [i, a] of Object.entries(answers)) {
+      total++;
+      if (a === quiz[i]?.correct) correct++;
+    }
+  }
+  return total ? Math.round((correct / total) * 100) : 0;
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+function init() {
+  load();
+
+  // Date display
+  document.getElementById('todayDate').textContent = formatDate(todayKey());
+
+  // Show saved key indicator
+  if (STATE.apiKey) {
+    document.getElementById('apiKeyInput').placeholder = '✓ API key saved';
+  }
+
+  renderSidebar();
+  renderTodayView();
+  showView('today');
+}
+
+init();
+</script>
+</body>
+</html>
