@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Morning Brief</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#c8a96e">
+<meta name="theme-color" content="#f5f3ef">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Morning Brief">
@@ -13,24 +13,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0f14;
-    --surface: #13161e;
-    --surface2: #1a1e28;
-    --border: #252936;
-    --accent: #c8a96e;
-    --accent2: #7eb8c9;
-    --accent3: #9b7ed4;
-    --text: #e8e6e0;
-    --text-muted: #7a7d8a;
-    --text-dim: #4a4d5a;
-    --success: #6dbf8f;
-    --danger: #d96b6b;
-    --tag-fp: #c8a96e22;
-    --tag-fp-border: #c8a96e55;
-    --tag-ac: #7eb8c922;
-    --tag-ac-border: #7eb8c955;
-    --tag-ad: #9b7ed422;
-    --tag-ad-border: #9b7ed455;
+    --bg: #f5f3ef;
+    --surface: #ffffff;
+    --surface2: #f0ede8;
+    --border: #e0dbd2;
+    --accent: #8b6914;
+    --accent2: #2a7a94;
+    --accent3: #6b4fa8;
+    --text: #1a1714;
+    --text-muted: #4a4540;
+    --text-dim: #9a9590;
+    --success: #2d7a4f;
+    --danger: #b84444;
+    --tag-fp: #f5e9cc;
+    --tag-fp-border: #d4a840;
+    --tag-ac: #d4edf5;
+    --tag-ac-border: #4aa8c8;
+    --tag-ad: #ede8f5;
+    --tag-ad-border: #9b7ed4;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -546,7 +546,7 @@
     line-height: 1.4;
   }
 
-  .option:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+  .option:hover:not(:disabled) { border-color: var(--accent); color: var(--text); background: #f5e9cc; }
   .option.correct { border-color: var(--success); background: #6dbf8f15; color: var(--success); }
   .option.wrong { border-color: var(--danger); background: #d96b6b15; color: var(--danger); }
   .option.reveal { border-color: var(--success); background: #6dbf8f08; color: var(--success); }
