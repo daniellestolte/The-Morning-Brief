@@ -1083,63 +1083,9 @@ function pickTopic() {
 
 // ─── API Call ─────────────────────────────────────────────────────────────────
 
-async function generateLesson(topicObj) {
-  const { topic, cat } = topicObj;
-  const catLabel = TOPICS[cat].label;
-  const levelMap = {
-    beginner: 'Keep explanations simple with analogies. No jargon without explanation.',
-    intermediate: 'Assume familiarity with basic business concepts. Use real examples.',
-    advanced: 'Go deep. Include technical nuance and edge cases.',
-  };
-  const lvl = levelMap[STATE.preferences.level] || levelMap.intermediate;
+// ─── Gemini API helper ───────────────────────────────────────────────────────
 
-  const prompt = `You are a world-class finance and accounting educator creating a daily lesson for ${STATE.preferences.name || 'a learner'}, who is currently an admin/finance officer at an Indigenous property management company in remote Northern Territory, Australia. She previously worked as an FP&A analyst at Brookfield Renewable and wants to rebuild and deepen her knowledge.
-
-Today's lesson topic: "${topic}" (Category: ${catLabel})
-
-Learning level: ${lvl}
-
-Create a lesson that takes 30-60 minutes to read and study. Structure it as follows (respond ONLY in valid JSON — no markdown, no code fences):
-
-{
-  "title": "Engaging lesson title",
-  "subtitle": "One sentence hook/description",
-  "estimatedMins": 40,
-  "keyTakeaways": ["takeaway 1", "takeaway 2", "takeaway 3"],
-  "sections": [
-    {
-      "heading": "Section heading",
-      "type": "text|example|callout|tip",
-      "content": "Rich educational content here. Use plain text with **bold** for emphasis. Write in paragraphs. Be specific and use real numbers/examples. For examples, use Australian context where possible — GST at 10%, AUD amounts, NT-specific context where relevant."
-    }
-  ],
-  "realWorldApplication": "A specific paragraph about how this applies to property management, government contract administration, or the NT context.",
-  "quiz": [
-    {
-      "question": "Clear question text?",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correct": 0,
-      "explanation": "Explanation of why this is correct and why others are wrong."
-    }
-  ],
-  "resources": [
-    {
-      "title": "Resource title",
-      "description": "Why this is useful",
-      "url": "https://actual-real-url.com",
-      "type": "article|video|tool|course|documentation"
-    }
-  ]
-}
-
-Requirements:
-- Write 4-5 content sections (each 100-200 words, be concise)
-- Include at least one worked numerical example with real numbers
-- Write 5 quiz questions with 4 options each (mix of easy, medium, hard)
-- Include 4-6 real, working external resource URLs (prefer: ATO, AASB, Xero blog, AccountingCoach, Khan Academy, CPA Australia, ICAA, Investopedia, CFI, Australian Government sites)
-- Make it genuinely educational, not surface-level
-- Connect to practical job relevance wherever possible`;
-
+async function callGemini(prompt) {
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${STATE.apiKey}`,
     {
@@ -1147,40 +1093,62 @@ Requirements:
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 8192,
-        },
+        generationConfig: { temperature: 0.7, maxOutputTokens: 3000 },
       }),
     }
   );
-
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error?.message || `API error ${res.status}`);
   }
-
   const data = await res.json();
   let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  // Strip any accidental markdown fences
   raw = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-  // If JSON is truncated, try to recover it
   try {
     return JSON.parse(raw);
   } catch(e) {
-    // Try to find the last complete top-level key and close the JSON
-    const truncated = raw.lastIndexOf(',"resources"');
-    if (truncated > 0) {
-      const recovered = raw.substring(0, truncated) + ',"resources":[]}';
-      try { return JSON.parse(recovered); } catch(e2) {}
-    }
-    const truncated2 = raw.lastIndexOf(',"quiz"');
-    if (truncated2 > 0) {
-      const recovered2 = raw.substring(0, truncated2) + ',"quiz":[],"resources":[]}';
-      try { return JSON.parse(recovered2); } catch(e3) {}
-    }
-    throw new Error('Lesson generation failed — please try again. (JSON parse error)');
+    throw new Error('Could not parse response — please try again.');
   }
+}
+
+async function generateLesson(topicObj) {
+  const { topic, cat } = topicObj;
+  const catLabel = TOPICS[cat].label;
+  const levelMap = {
+    beginner: 'Simple explanations with analogies. No jargon without explanation.',
+    intermediate: 'Assume basic business knowledge. Use real examples.',
+    advanced: 'Technical depth, nuance and edge cases.',
+  };
+  const lvl = levelMap[STATE.preferences.level] || levelMap.intermediate;
+  const ctx = `Finance/admin officer at Indigenous property management company, remote NT Australia. Ex-FP&A analyst at Brookfield Renewable. Topic: "${topic}" (${catLabel}). Level: ${lvl}. Use Australian context (GST 10%, AUD amounts).`;
+
+  // ── Request 1: Lesson content ──────────────────────────────────────────────
+  updateLoadingStep('📖 Generating lesson content…');
+  const lessonData = await callGemini(`You are a finance educator. ${ctx}
+
+Respond ONLY with valid JSON, no markdown. Fill all fields with real educational content:
+{"title":"string","subtitle":"string","estimatedMins":35,"keyTakeaways":["string","string","string"],"sections":[{"heading":"string","type":"text","content":"string 100-150 words"},{"heading":"string","type":"example","content":"string 100-150 words with real AUD numbers and calculations"},{"heading":"string","type":"text","content":"string 100-150 words"},{"heading":"string","type":"tip","content":"string 60-80 words"}],"realWorldApplication":"string 60-80 words connecting to property management or NT government contracts"}`);
+
+  // ── Request 2: Quiz ────────────────────────────────────────────────────────
+  updateLoadingStep('❓ Generating quiz questions…');
+  const quizData = await callGemini(`You are a finance educator. Create 5 quiz questions about "${topic}" for an intermediate finance/admin professional in Australia.
+
+Respond ONLY with valid JSON, no markdown:
+{"quiz":[{"question":"string","options":["string","string","string","string"],"correct":0,"explanation":"string 20-30 words"},{"question":"string","options":["string","string","string","string"],"correct":1,"explanation":"string 20-30 words"},{"question":"string","options":["string","string","string","string"],"correct":2,"explanation":"string 20-30 words"},{"question":"string","options":["string","string","string","string"],"correct":0,"explanation":"string 20-30 words"},{"question":"string","options":["string","string","string","string"],"correct":3,"explanation":"string 20-30 words"}]}`);
+
+  // ── Request 3: Resources ───────────────────────────────────────────────────
+  updateLoadingStep('🔗 Finding resources…');
+  const resourceData = await callGemini(`You are a finance educator. Suggest 3 real online resources for learning about "${topic}" in an Australian context.
+
+Respond ONLY with valid JSON, no markdown. Use only real URLs from: ato.gov.au, aasb.gov.au, cpaaustralia.com.au, accountingcoach.com, khanacademy.org, xero.com, investopedia.com, corporatefinanceinstitute.com, icaa.org.au:
+{"resources":[{"title":"string","description":"string 15-20 words","url":"https://real-url.com","type":"article"},{"title":"string","description":"string 15-20 words","url":"https://real-url.com","type":"course"},{"title":"string","description":"string 15-20 words","url":"https://real-url.com","type":"documentation"}]}`);
+
+  // ── Merge all three responses ──────────────────────────────────────────────
+  return {
+    ...lessonData,
+    quiz: quizData.quiz || [],
+    resources: resourceData.resources || [],
+  };
 }
 
 // ─── Render ───────────────────────────────────────────────────────────────────
@@ -1450,7 +1418,7 @@ function toggleFocus(cat, el) {
 
 async function startGenerate() {
   if (!STATE.apiKey) {
-    alert('Please enter your Anthropic API key first (top bar).');
+    alert('Please enter your Gemini API key first (top bar).');
     return;
   }
   const key = todayKey();
@@ -1483,8 +1451,14 @@ function showLoading(topic) {
       <div class="loading-label">Generating your lesson</div>
       <div class="loading-topic">${topic}</div>
       <div class="loading-bar"></div>
-      <div style="font-size:12px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; margin-top:8px;">This takes ~20 seconds…</div>
+      <div id="loadingStep" style="font-size:12px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; margin-top:8px;">📖 Generating lesson content…</div>
+      <div style="font-size:11px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; margin-top:4px;">3 requests — takes ~30 seconds</div>
     </div>`;
+}
+
+function updateLoadingStep(msg) {
+  const el = document.getElementById('loadingStep');
+  if (el) el.textContent = msg;
 }
 
 async function regenerateToday() {
