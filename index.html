@@ -1133,7 +1133,7 @@ Create a lesson that takes 30-60 minutes to read and study. Structure it as foll
 }
 
 Requirements:
-- Write 4-6 rich content sections (each 150-300 words)
+- Write 4-5 content sections (each 100-200 words, be concise)
 - Include at least one worked numerical example with real numbers
 - Write 5 quiz questions with 4 options each (mix of easy, medium, hard)
 - Include 4-6 real, working external resource URLs (prefer: ATO, AASB, Xero blog, AccountingCoach, Khan Academy, CPA Australia, ICAA, Investopedia, CFI, Australian Government sites)
@@ -1149,7 +1149,7 @@ Requirements:
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 4000,
+          maxOutputTokens: 8192,
         },
       }),
     }
@@ -1161,10 +1161,26 @@ Requirements:
   }
 
   const data = await res.json();
-  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
   // Strip any accidental markdown fences
-  const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-  return JSON.parse(clean);
+  raw = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  // If JSON is truncated, try to recover it
+  try {
+    return JSON.parse(raw);
+  } catch(e) {
+    // Try to find the last complete top-level key and close the JSON
+    const truncated = raw.lastIndexOf(',"resources"');
+    if (truncated > 0) {
+      const recovered = raw.substring(0, truncated) + ',"resources":[]}';
+      try { return JSON.parse(recovered); } catch(e2) {}
+    }
+    const truncated2 = raw.lastIndexOf(',"quiz"');
+    if (truncated2 > 0) {
+      const recovered2 = raw.substring(0, truncated2) + ',"quiz":[],"resources":[]}';
+      try { return JSON.parse(recovered2); } catch(e3) {}
+    }
+    throw new Error('Lesson generation failed — please try again. (JSON parse error)');
+  }
 }
 
 // ─── Render ───────────────────────────────────────────────────────────────────
