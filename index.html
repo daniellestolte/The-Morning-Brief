@@ -1205,17 +1205,18 @@ function formatDate(key) {
 }
 
 function computeStreak() {
-  const keys = Object.keys(STATE.lessons).sort().reverse();
-  if (!keys.length) return 0;
+  // Get unique dates lessons were generated
+  const dates = [...new Set(Object.values(STATE.lessons).map(l => l.date || todayKey()))].sort().reverse();
+  if (!dates.length) return 0;
   let streak = 0;
   let expected = new Date();
   expected.setHours(0,0,0,0);
-  for (const k of keys) {
-    const d = new Date(k + 'T00:00:00');
-    const diff = Math.round((expected - d) / 86400000);
+  for (const d of dates) {
+    const lessonDate = new Date(d + 'T00:00:00');
+    const diff = Math.round((expected - lessonDate) / 86400000);
     if (diff > 1) break;
     streak++;
-    expected = d;
+    expected = lessonDate;
     expected.setDate(expected.getDate() - 1);
   }
   return streak;
@@ -1369,18 +1370,18 @@ function renderSidebar() {
 
   list.innerHTML = keys.map(k => {
     const l = STATE.lessons[k];
-    const isToday = k === todayKey();
-    return `<div class="history-item ${isToday ? 'active' : ''}" onclick="loadLesson('${k}')">
-      <div class="history-date">${isToday ? '→ Today' : formatDate(k)}</div>
-      <div class="history-title">${l.title || l.topic}</div>
+    const lessonDate = l.date || todayKey();
+    const isToday = lessonDate === todayKey();
+    const dateLabel = isToday ? '→ Today' : formatDate(lessonDate);
+    return `<div class="history-item" onclick="loadLesson('${k}')">
+      <div class="history-date">${dateLabel}</div>
+      <div class="history-title">${l.data?.title || l.topic}</div>
       <span class="cat-pill cat-${l.cat}">${TOPICS[l.cat]?.label || l.cat}</span>
     </div>`;
   }).join('');
 }
 
 function renderTodayView() {
-  const key = todayKey();
-  const lesson = STATE.lessons[key];
   const container = document.getElementById('viewToday');
 
   if (!STATE.apiKey) {
@@ -1388,12 +1389,15 @@ function renderTodayView() {
     return;
   }
 
-  if (!lesson) {
+  // Show most recent lesson if one exists
+  const keys = Object.keys(STATE.lessons).sort().reverse();
+  if (!keys.length) {
     container.innerHTML = renderWelcome(false);
     return;
   }
 
-  container.innerHTML = renderLesson(lesson, key);
+  const key = keys[0];
+  container.innerHTML = renderLesson(STATE.lessons[key], key);
   attachQuizHandlers(key);
 }
 
@@ -1429,7 +1433,8 @@ function renderLesson(lesson, key) {
   const cat = lesson.cat || 'ac';
   const catLabel = TOPICS[cat]?.label || 'Lesson';
   const catColor = { fp: 'var(--accent)', ac: 'var(--accent2)', ad: 'var(--accent3)' }[cat] || 'var(--accent)';
-  const isToday = key === todayKey();
+  const lessonDate = lesson.date || key.substring(0, 10);
+  const isToday = lessonDate === todayKey();
 
   // Sections
   const sectionsHtml = (lesson.data?.sections || []).map(s => {
@@ -1623,22 +1628,29 @@ async function startGenerate() {
     alert('Please enter your Gemini API key first (top bar).');
     return;
   }
-  const key = todayKey();
   const topicObj = pickTopic();
   showLoading(topicObj.topic);
 
   try {
     const data = await generateLesson(topicObj);
+    // Use timestamp as key so every lesson is saved independently
+    const key = new Date().toISOString().replace(/[:.]/g, '-');
     STATE.lessons[key] = {
       topic: topicObj.topic,
       cat: topicObj.cat,
+      date: todayKey(),
       generatedAt: new Date().toISOString(),
       data,
       quizAnswers: {},
     };
+    STATE.lastKey = key;
     save();
     renderSidebar();
-    renderTodayView();
+    // Show the newly generated lesson
+    const container = document.getElementById('viewToday');
+    container.innerHTML = renderLesson(STATE.lessons[key], key);
+    attachQuizHandlers(key);
+    showView('today');
   } catch(e) {
     document.getElementById('viewToday').innerHTML =
       `<div class="error-box">⚠️ Error generating lesson: ${e.message}<br><br>
@@ -1664,10 +1676,6 @@ function updateLoadingStep(msg) {
 }
 
 async function regenerateToday() {
-  if (!confirm('Generate a new lesson for today? This will replace the current one.')) return;
-  const key = todayKey();
-  delete STATE.lessons[key];
-  save();
   await startGenerate();
 }
 
