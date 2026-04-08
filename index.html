@@ -883,6 +883,9 @@
     </div>
 
     <div class="nav-section">Navigation</div>
+    <button class="nav-btn" id="navHome" onclick="showView('home')">
+      <span class="nav-icon">🏠</span> Home
+    </button>
     <button class="nav-btn active" id="navToday" onclick="showView('today')">
       <span class="nav-icon">📖</span> Today's Lesson
     </button>
@@ -1692,10 +1695,15 @@ function saveApiKey() {
 function showView(view) {
   document.getElementById('viewToday').style.display = view === 'today' ? '' : 'none';
   document.getElementById('viewSettings').style.display = view === 'settings' ? '' : 'none';
+  document.getElementById('navHome').classList.toggle('active', view === 'home');
   document.getElementById('navToday').classList.toggle('active', view === 'today');
   document.getElementById('navSettings').classList.toggle('active', view === 'settings');
 
   if (view === 'settings') renderSettingsView();
+  if (view === 'home') {
+    document.getElementById('viewToday').style.display = '';
+    document.getElementById('viewToday').innerHTML = renderWelcome(!STATE.apiKey);
+  }
 }
 
 function renderSettingsView() {
